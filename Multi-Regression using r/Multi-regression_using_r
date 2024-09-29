@@ -1,0 +1,82 @@
+# Load necessary libraries
+library(readr)    # For reading CSV files
+library(readxl)   # For reading Excel files
+library(ggplot2)  # For creating plots
+library(gridExtra) # For arranging multiple plots
+
+# Read data from Excel file (Adjust the path to your file)
+data <- read_excel("Customer_Data.xlsx")
+
+# Display the first few rows to confirm data load
+head(data)
+
+# Perform Multiple Regression
+# Predicting 'Customer_Satisfaction' using multiple predictors
+model <- lm(Customer_Satisfaction ~ Perceived_Usefulness + Perceived_Easeofuse + Trust + Social_Influence + Innovativeness, data = data)
+
+# Print summary of the model to show regression coefficients, R-squared, and p-values
+summary(model)
+
+# 1. Scatter plot of each predictor against Customer Satisfaction
+p1 <- ggplot(data, aes(x = Perceived_Usefulness, y = Customer_Satisfaction)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Customer Satisfaction vs. Perceived Usefulness", x = "Perceived Usefulness", y = "Customer Satisfaction")
+
+p2 <- ggplot(data, aes(x = Perceived_Easeofuse, y = Customer_Satisfaction)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Customer Satisfaction vs. Perceived Ease of Use", x = "Perceived Ease of Use", y = "Customer Satisfaction")
+
+p3 <- ggplot(data, aes(x = Trust, y = Customer_Satisfaction)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Customer Satisfaction vs. Trust", x = "Trust", y = "Customer Satisfaction")
+
+p4 <- ggplot(data, aes(x = Social_Influence, y = Customer_Satisfaction)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Customer Satisfaction vs. Social Influence", x = "Social Influence", y = "Customer Satisfaction")
+
+p5 <- ggplot(data, aes(x = Innovativeness, y = Customer_Satisfaction)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Customer Satisfaction vs. Innovativeness", x = "Innovativeness", y = "Customer Satisfaction")
+
+# Arrange the plots in a grid
+grid.arrange(p1, p2, p3, p4, p5, ncol = 2)
+
+# 2. Diagnostic plots for the regression model
+par(mfrow = c(2, 2))  # Set up a 2x2 plotting space
+plot(model)           # Generate diagnostic plots (residuals, Q-Q plot, leverage)
+
+# Reset plotting space
+par(mfrow = c(1, 1))
+# Residuals plot
+residuals <- resid(lm_model)
+predicted <- predict(lm_model)
+residuals_plot <- ggplot(data.frame(predicted, residuals), aes(x = predicted, y = residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0, col = "red", linetype = "dashed") +
+  ggtitle("Residuals vs Fitted Values") +
+  theme_minimal()
+
+# Q-Q plot
+qq_plot <- ggplot(data.frame(residuals), aes(sample = residuals)) +
+  stat_qq() +
+  stat_qq_line() +
+  ggtitle("Q-Q Plot of Residuals") +
+  theme_minimal()
+
+# Coefficient plot
+coef_summary <- tidy(lm_model)
+coef_plot <- ggplot(coef_summary, aes(x = term, y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = estimate - std.error, ymax = estimate + std.error), width = 0.2) +
+  coord_flip() +
+  ggtitle("Coefficient Plot") +
+  theme_minimal()
+
+# Arrange plots
+grid.arrange(grobs = scatter_plots, ncol = 2)
+grid.arrange(residuals_plot, qq_plot, coef_plot, ncol = 1)
